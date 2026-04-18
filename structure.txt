@@ -1,0 +1,16 @@
+.
+├── .gitignore
+├── .prettierrc
+├── .vscode
+│   ├── launch.json
+│   └── settings.json
+├── README.md
+├── bun.lock
+├── package.json
+├── src
+│   ├── binarySearch.ts
+│   └── index.ts
+├── structure.txt
+└── tsconfig.json
+
+3 directories, 11 files
