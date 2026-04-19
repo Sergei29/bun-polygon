@@ -1,3 +1,5 @@
+import { describe, it, expect } from "bun:test";
+
 const sum = (a: number, b: number) => {
   return a + b;
 };
