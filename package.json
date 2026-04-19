@@ -4,11 +4,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
     "typescript": "^5"
