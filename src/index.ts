@@ -1,5 +1,6 @@
 import { binarySearch } from "./binarySearch";
 import { selectionSort, selectionSortRecursive } from "./selectionSort";
 import { quickSort } from "./quickSort";
+import { breadthFirstSearch, GRAPH_SUCCESS } from "./graphs/breadthFirstSearch";
 
-console.log(quickSort([2, 4, 1, 0, 3, -1, -99, 99]));
+console.log(breadthFirstSearch(GRAPH_SUCCESS));

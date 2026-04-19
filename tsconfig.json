@@ -25,9 +25,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "types": [
-      "bun-types", // Required for Bun environment types
-      "vitest/globals" // This fixes your 'describe' error
-    ]
+    "types": ["bun-types"]
   }
 }
