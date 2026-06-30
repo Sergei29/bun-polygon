@@ -1,1 +1,3 @@
-console.log("Hello via Bun updated!");
+import { run } from "./llamaindex/textAnalysisTool";
+
+run();

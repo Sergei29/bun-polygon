@@ -13,5 +13,10 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@llamaindex/openai": "^0.4.23",
+    "@llamaindex/workflow": "^1.1.25",
+    "llamaindex": "^0.12.1"
   }
 }
