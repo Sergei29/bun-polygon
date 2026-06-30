@@ -1,3 +1,3 @@
-import { run } from "./llamaindex/textAnalysisTool";
+import { main } from "./llamaindex/manualRag";
 
-run();
+main().catch(console.error);
