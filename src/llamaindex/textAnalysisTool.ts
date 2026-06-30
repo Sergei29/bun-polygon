@@ -19,11 +19,14 @@ async function textAnalysisTool(query: string) {
   // Query the index
   const queryEngine = index.asQueryEngine();
 
-  const response = await queryEngine.query({
+  const stream = await queryEngine.query({
     query,
+    stream: true,
   });
 
-  return response.message.content;
+  for await (const chunk of stream) {
+    process.stdout.write(chunk.delta);
+  }
 }
 
 export const run = () => {
@@ -31,8 +34,7 @@ export const run = () => {
     const query = data.toString().trim();
     if (query) {
       try {
-        const response = await textAnalysisTool(query);
-        console.log("\nResponse:", response);
+        textAnalysisTool(query);
       } catch (error) {
         console.error("\nError:", error);
       }
