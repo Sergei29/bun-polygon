@@ -1,1 +1,3 @@
-console.log("Bun !");
+import { run } from "@/llamaindex/queryThePDF";
+
+run();

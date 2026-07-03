@@ -1,5 +1,4 @@
-import { Document, Settings, VectorStoreIndex, MetadataMode } from "llamaindex";
-import { OpenAIEmbedding } from "@llamaindex/openai";
+import { Document, Settings, VectorStoreIndex } from "llamaindex";
 import fs from "fs/promises";
 import { openai, openaiEmbedding } from "@/openai";
 
