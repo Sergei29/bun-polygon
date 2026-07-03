@@ -1,1 +1,3 @@
-console.log("Hello via Bun updated!");
+import { run } from "./example2";
+
+run();
