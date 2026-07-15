@@ -5,6 +5,7 @@ export const createPatientValidation: RequestHandler = (req, res, next) => {
   const validation = createPatientSchema.safeParse(req.body);
 
   if (validation.success) {
+    req.body = validation.data;
     return next();
   }
 

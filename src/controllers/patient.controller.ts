@@ -4,7 +4,7 @@ import type { PatientResponse } from "@/types";
 import service from "@/services/patient.service";
 
 const createPatientController: RequestHandler<
-  Record<string, unknown>,
+  Record<string, never>,
   PatientResponse,
   CreatePatientInput
 > = async (req, res) => {
