@@ -5,13 +5,19 @@
   "private": true,
   "scripts": {
     "dev": "bun run src/server.ts",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:check": "drizzle-kit check"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "drizzle-kit": "^0.31.10",
     "prettier": "^3.8.3"
   },
   "peerDependencies": {
