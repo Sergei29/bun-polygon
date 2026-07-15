@@ -4,13 +4,9 @@ import { z } from "zod";
 config();
 
 const envSchema = z.object({
-  port: z.number().min(3000),
-  databaseUrl: z.string().min(1),
-  jwtSecret: z.string().min(1),
+  PORT: z.coerce.number().default(3000),
+  DATABASE_URL: z.url(),
+  JWT_SECRET: z.string().min(32),
 });
 
-export const env = envSchema.parse({
-  port: Number(process.env.PORT),
-  databaseUrl: process.env.DATABASE_URL!,
-  jwtSecret: process.env.JWT_SECRET!,
-});
+export const env = envSchema.parse(process.env);
