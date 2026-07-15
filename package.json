@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "bun run src/server.ts",
     "format": "prettier . --write",
+    "check:format": "prettier --check .",
+    "check:types": "npx tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

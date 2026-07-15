@@ -1,20 +1,17 @@
 import { type RequestHandler } from "express";
-import { type createPatientInput } from "@/schemas/patient.schema";
+import { type CreatePatientInput } from "@/schemas/patient.schema";
+import type { PatientResponse } from "@/types";
 import service from "@/services/patient.service";
 
-const createPatientController: RequestHandler = async (req, res) => {
-  const createPatientInput = req.body as createPatientInput;
+const createPatientController: RequestHandler<
+  Record<string, unknown>,
+  PatientResponse,
+  CreatePatientInput
+> = async (req, res) => {
+  const createPatientInput = req.body;
   const result = await service.create(createPatientInput);
 
-  if (result.data) {
-    return res.status(201).json({
-      data: result.data,
-    });
-  }
-
-  return res.status(500).json({
-    error: "Server error, failed to create new patient",
-  });
+  return res.status(201).json(result);
 };
 
 const controller = {

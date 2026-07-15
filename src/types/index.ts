@@ -1,11 +1,4 @@
-export type AwaitedResult<D> =
-  | {
-      data: D;
-      error: null;
-    }
-  | { data: null; error: string };
-
-export type PatientDb = {
+export type PatientResponse = {
   id: string;
   firstName: string;
   lastName: string;

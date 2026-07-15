@@ -61,9 +61,7 @@
         "patients_email_unique": {
           "name": "patients_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

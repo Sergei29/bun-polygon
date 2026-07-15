@@ -11,4 +11,4 @@ export const createPatientSchema = z.object({
   }, "Date of birth cannot be in the future"),
 });
 
-export type createPatientInput = z.infer<typeof createPatientSchema>;
+export type CreatePatientInput = z.infer<typeof createPatientSchema>;
