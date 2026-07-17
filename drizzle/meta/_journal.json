@@ -15,6 +15,13 @@
       "when": 1784118530254,
       "tag": "0001_nasty_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784304303999,
+      "tag": "0002_shallow_longshot",
+      "breakpoints": true
     }
   ]
 }
