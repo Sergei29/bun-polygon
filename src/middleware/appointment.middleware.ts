@@ -1,9 +1,16 @@
 import type { RequestHandler } from "express";
 
-import { createPatientSchema } from "@/schemas/patient.schema";
+import { createBookingSchema } from "@/schemas/booking.schema";
 
-export const createPatientValidation: RequestHandler = (req, res, next) => {
-  const validation = createPatientSchema.safeParse(req.body);
+export const bookAppointmentValidation: RequestHandler<{ id: string }> = (
+  req,
+  res,
+  next,
+) => {
+  const validation = createBookingSchema.safeParse({
+    patientId: req.body.patientId,
+    appointmentId: req.params.id,
+  });
 
   if (validation.success) {
     req.body = validation.data;
