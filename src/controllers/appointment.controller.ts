@@ -9,7 +9,10 @@ const createBookingController: RequestHandler<
   BookingCreateResponse,
   CreateBookingInput
 > = async (req, res) => {
-  const newBooking = await service.booking(req.body);
+  const newBooking = await service.booking({
+    patientId: req.body.patientId,
+    appointmentId: req.params.id,
+  });
 
   return res.status(201).json(newBooking);
 };
