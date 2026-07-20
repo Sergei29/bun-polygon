@@ -5,5 +5,12 @@ export type PatientResponse = {
   email: string;
   dateOfBirth: string;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date | null;
+};
+
+export type BookingCreateResponse = {
+  appointmentId: string;
+  patientId: string;
+  id: string;
+  createdAt: Date;
 };

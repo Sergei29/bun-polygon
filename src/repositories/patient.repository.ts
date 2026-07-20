@@ -1,3 +1,5 @@
+import { eq } from "drizzle-orm";
+
 import { type CreatePatientInput } from "@/schemas/patient.schema";
 import { patients } from "@/db/schema";
 import { db } from "@/db";
@@ -15,7 +17,16 @@ const patientSelectFields = {
   updatedAt: patients.updatedAt,
 };
 
-export const createNewPatient = async (input: CreatePatientInput) => {
+const findById = async (patientId: string) => {
+  const [patient] = await db
+    .select(patientSelectFields)
+    .from(patients)
+    .where(eq(patients.id, patientId));
+
+  return patient;
+};
+
+const createNewPatient = async (input: CreatePatientInput) => {
   const { firstName, lastName, email, dateOfBirth } = input;
 
   const [patient] = await db
@@ -36,6 +47,7 @@ export const createNewPatient = async (input: CreatePatientInput) => {
 };
 
 const repository = {
+  findById,
   create: createNewPatient,
 };
 

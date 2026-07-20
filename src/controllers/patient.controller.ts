@@ -1,6 +1,7 @@
-import { type RequestHandler } from "express";
-import { type CreatePatientInput } from "@/schemas/patient.schema";
+import type { RequestHandler } from "express";
+import type { CreatePatientInput } from "@/schemas/patient.schema";
 import type { PatientResponse } from "@/types";
+
 import service from "@/services/patient.service";
 
 const createPatientController: RequestHandler<
