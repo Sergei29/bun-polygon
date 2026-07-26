@@ -3,5 +3,6 @@
     "*": false
   },
   "github.copilot.inlineSuggest.enable": false,
-  "codeium.enable": false
+  "codeium.enable": false,
+  "cSpell.words": ["pgbouncer", "TIMESTAMPTZ", "VARCHAR"]
 }
