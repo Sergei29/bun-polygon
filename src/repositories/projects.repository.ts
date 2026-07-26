@@ -1,15 +1,11 @@
 import { eq, and } from "drizzle-orm";
-import { db } from "@/db";
+import { withTenantContext } from "@/db/tenantContext";
 import { projects } from "@/db/schema";
 
-export const listProjects = async ({ tenantId }: { tenantId: string }) => {
-  const rows = await db
-    .select()
-    .from(projects)
-    .where(eq(projects.tenantId, tenantId));
-
-  return rows;
-};
+export const listProjects = async ({ tenantId }: { tenantId: string }) =>
+  withTenantContext(tenantId, (tx) =>
+    tx.select().from(projects).where(eq(projects.tenantId, tenantId)),
+  );
 
 export const getProject = async ({
   projectId,
@@ -17,25 +13,27 @@ export const getProject = async ({
 }: {
   projectId: string;
   tenantId: string;
-}) => {
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)));
+}) =>
+  withTenantContext(tenantId, async (tx) => {
+    const [project] = await tx
+      .select()
+      .from(projects)
+      .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)));
 
-  return project || null;
-};
+    return project || null;
+  });
 
 export const createProject = async (input: {
   tenantId: string;
   name: string;
   description?: string;
   createdBy: string;
-}) => {
-  const result = await db.insert(projects).values(input).returning();
+}) =>
+  withTenantContext(input.tenantId, async (tx) => {
+    const result = await tx.insert(projects).values(input).returning();
 
-  return result[0] || null;
-};
+    return result[0] || null;
+  });
 
 export const updateProject = async ({
   projectId,
@@ -45,15 +43,16 @@ export const updateProject = async ({
   projectId: string;
   tenantId: string;
   input: { name: string; description?: string | null };
-}) => {
-  const result = await db
-    .update(projects)
-    .set(input)
-    .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)))
-    .returning();
+}) =>
+  withTenantContext(tenantId, async (tx) => {
+    const result = await tx
+      .update(projects)
+      .set(input)
+      .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)))
+      .returning();
 
-  return result[0] || null;
-};
+    return result[0] || null;
+  });
 
 export const deleteProject = async ({
   projectId,
@@ -61,11 +60,12 @@ export const deleteProject = async ({
 }: {
   projectId: string;
   tenantId: string;
-}) => {
-  const result = await db
-    .delete(projects)
-    .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)))
-    .returning();
+}) =>
+  withTenantContext(tenantId, async (tx) => {
+    const result = await tx
+      .delete(projects)
+      .where(and(eq(projects.tenantId, tenantId), eq(projects.id, projectId)))
+      .returning();
 
-  return result[0]?.id || null;
-};
+    return result[0]?.id || null;
+  });

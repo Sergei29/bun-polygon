@@ -171,6 +171,22 @@ BEGIN
 END $$;
 ```
 
+## Row-Level Security on `projects`
+
+Tenant isolation above is enforced at the app layer: every repository query filters `WHERE tenant_id = ...`. That's one place a bug can slip through — a missing `.where()` in a new query and cross-tenant data leaks. Postgres Row-Level Security (RLS) adds a second, independent backstop directly on the `projects` table: even if the app forgot to filter, the database itself refuses to return or touch a row that doesn't belong to the current tenant.
+
+RLS only means something if the connecting role isn't a superuser or the table owner — both bypass RLS unconditionally, policies or not. Since `DATABASE_URL` originally pointed at the `postgres` superuser created by the Docker image, the first step was creating a dedicated, unprivileged `app_user` role (`drizzle/0002_create_app_user_role.sql`) with only the grants the app needs, and pointing the app's connection at it instead.
+
+In Drizzle, this is expressed directly in `src/db/schema.ts`:
+
+- `pgRole("app_user").existing()` declares the role for reference in policies, without Drizzle trying to manage its creation (that's handled by the hand-written migration above).
+- `.enableRLS()` on the `projects` table turns RLS on.
+- `pgPolicy(...)` entries in the table's config define one policy per command (`select`, `insert`, `update`, `delete`), each checking `tenant_id = current_setting('app.tenant_id', true)::uuid` — i.e., the row's tenant must match a Postgres session variable, not anything the request itself supplies.
+
+That `app.tenant_id` session variable is the missing piece: Postgres has no idea what "the current tenant" means on its own. `src/db/tenantContext.ts` sets it via `set_config('app.tenant_id', tenantId, true)` inside a `db.transaction(...)`, with `is_local = true` so it only applies for that one transaction — required because the connection pool reuses connections across requests from different tenants, and a session-wide (non-local) setting would leak between them. Every `projects.repository.ts` function now runs through this `withTenantContext(tenantId, ...)` wrapper, sourcing `tenantId` from the same verified-JWT value the app-level filter already uses.
+
+One non-obvious wrinkle: the `select` policy isn't just about reads. Postgres checks `INSERT ... RETURNING` and `UPDATE ... RETURNING` output against the table's `SELECT` policy too, and — rather than silently dropping rows the caller can't see — raises `"new row violates row-level security policy"` if none applies. Since every write in this repository uses `.returning()`, a write-only policy set would have broken every write, not just reads. The tradeoff: this closes off `SuperAdmin`'s documented cross-tenant reads under the current single-role RLS setup, since the policy can't distinguish RBAC roles, only the Postgres role and the session variable. Nothing in the app implements that cross-tenant path today, so it's a deferred limitation, not a regression — it would need its own mechanism (a separate role, or a query path that bypasses RLS) if built later.
+
 ## JWT Design for Multi-Tenancy
 
 - Both `tenantId` and `role` go into the JWT payload.

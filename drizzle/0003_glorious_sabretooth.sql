@@ -1,0 +1,4 @@
+ALTER TABLE "projects" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE POLICY "tenant_isolation_projects_write" ON "projects" AS PERMISSIVE FOR INSERT TO "app_user" WITH CHECK ("projects"."tenant_id" = current_setting('app.tenant_id', true)::uuid);--> statement-breakpoint
+CREATE POLICY "tenant_isolation_projects_update" ON "projects" AS PERMISSIVE FOR UPDATE TO "app_user" USING ("projects"."tenant_id" = current_setting('app.tenant_id', true)::uuid) WITH CHECK ("projects"."tenant_id" = current_setting('app.tenant_id', true)::uuid);--> statement-breakpoint
+CREATE POLICY "tenant_isolation_projects_delete" ON "projects" AS PERMISSIVE FOR DELETE TO "app_user" USING ("projects"."tenant_id" = current_setting('app.tenant_id', true)::uuid);

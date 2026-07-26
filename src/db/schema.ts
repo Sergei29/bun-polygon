@@ -8,8 +8,14 @@ import {
   inet,
   unique,
   index,
+  pgPolicy,
+  pgRole,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
+
+// Created outside Drizzle's migration diffing, in drizzle/0002_create_app_user_role.sql —
+// `.existing()` tells drizzle-kit not to try to generate CREATE ROLE for it.
+export const appUser = pgRole("app_user").existing();
 
 export const tenants = pgTable("tenants", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -58,8 +64,43 @@ export const projects = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("idx_projects_tenant").on(table.tenantId)],
-);
+  (table) => [
+    index("idx_projects_tenant").on(table.tenantId),
+    // DB-level backstop on top of the app-level tenant_id filtering in projects.repository.ts.
+    // Requires `app.tenant_id` to be set via set_config() in the same transaction (see
+    // src/db/tenantContext.ts); with it unset, current_setting(..., true) is NULL and every
+    // query/write is rejected (or, for SELECT, simply sees zero rows).
+    //
+    // SELECT is included alongside the writes — not just as its own concern, but because
+    // INSERT/UPDATE ... RETURNING implicitly re-checks the affected row against the SELECT
+    // policy, and errors ("new row violates row-level security policy") if none applies. A
+    // write-only policy set breaks every write in this codebase, since all of them use
+    // .returning(). This forecloses SuperAdmin's documented cross-tenant reads under RLS —
+    // nothing in the app implements that path today, so treat it as a deferred limitation:
+    // a future cross-tenant query would need its own DB role/bypass, not this policy.
+    pgPolicy("tenant_isolation_projects_read", {
+      for: "select",
+      to: appUser,
+      using: sql`${table.tenantId} = current_setting('app.tenant_id', true)::uuid`,
+    }),
+    pgPolicy("tenant_isolation_projects_write", {
+      for: "insert",
+      to: appUser,
+      withCheck: sql`${table.tenantId} = current_setting('app.tenant_id', true)::uuid`,
+    }),
+    pgPolicy("tenant_isolation_projects_update", {
+      for: "update",
+      to: appUser,
+      using: sql`${table.tenantId} = current_setting('app.tenant_id', true)::uuid`,
+      withCheck: sql`${table.tenantId} = current_setting('app.tenant_id', true)::uuid`,
+    }),
+    pgPolicy("tenant_isolation_projects_delete", {
+      for: "delete",
+      to: appUser,
+      using: sql`${table.tenantId} = current_setting('app.tenant_id', true)::uuid`,
+    }),
+  ],
+).enableRLS();
 
 // Append-only — never UPDATE or DELETE rows here (enforced in DB via migration grant revocation).
 export const auditLogs = pgTable(

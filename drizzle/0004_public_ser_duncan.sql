@@ -1,0 +1,1 @@
+CREATE POLICY "tenant_isolation_projects_read" ON "projects" AS PERMISSIVE FOR SELECT TO "app_user" USING ("projects"."tenant_id" = current_setting('app.tenant_id', true)::uuid);

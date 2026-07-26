@@ -3,6 +3,7 @@ import request from "supertest";
 import { inArray, like } from "drizzle-orm";
 import { app } from "@/app";
 import { db, client } from "@/db";
+import { withTenantContext } from "@/db/tenantContext";
 import { tenants, users, projects } from "@/db/schema";
 import { generateToken } from "@/utils/token";
 import { redisClient } from "@/db/redis";
@@ -11,7 +12,9 @@ import { redisClient } from "@/db/redis";
 async function seedTestData() {
   // Clean up from any previous run to avoid unique-constraint failures
   await db.delete(projects).where(like(projects.name, "TEST-%"));
-  await db.delete(tenants).where(inArray(tenants.name, ["Tenant A", "Tenant B"]));
+  await db
+    .delete(tenants)
+    .where(inArray(tenants.name, ["Tenant A", "Tenant B"]));
 
   const [tenantA] = await db
     .insert(tenants)
@@ -34,14 +37,18 @@ async function seedTestData() {
     .values({ tenantId: tenantB!.id, email: "userb@b.com", role: "Member" })
     .returning();
 
-  const [projectB] = await db
-    .insert(projects)
-    .values({
-      tenantId: tenantB!.id,
-      name: "TEST-Secret Project",
-      createdBy: userB!.id,
-    })
-    .returning();
+  // projects has an RLS write policy keyed on app.tenant_id — inserting requires
+  // going through withTenantContext, same as the real repository layer does.
+  const [projectB] = await withTenantContext(tenantB!.id, (tx) =>
+    tx
+      .insert(projects)
+      .values({
+        tenantId: tenantB!.id,
+        name: "TEST-Secret Project",
+        createdBy: userB!.id,
+      })
+      .returning(),
+  );
 
   return {
     tenantA: tenantA!.id,
@@ -60,7 +67,9 @@ describe("Tenant Isolation", () => {
 
   afterAll(async () => {
     await db.delete(projects).where(like(projects.name, "TEST-%"));
-    await db.delete(tenants).where(inArray(tenants.name, ["Tenant A", "Tenant B"]));
+    await db
+      .delete(tenants)
+      .where(inArray(tenants.name, ["Tenant A", "Tenant B"]));
     await client.end();
     await redisClient.quit(); // close Redis connection so bun test exits cleanly
   });
