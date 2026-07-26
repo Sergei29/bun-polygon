@@ -170,3 +170,34 @@ BEGIN
   END IF;
 END $$;
 ```
+
+## JWT Design for Multi-Tenancy
+
+- Both `tenantId` and `role` go into the JWT payload.
+- Everything downstream reads from these two fields.
+- Get them wrong, and nothing behaves correctly.
+
+```json
+// Example JWT payload
+{
+  "userId": "usr_abc123",
+  "tenantId": "ten_xyz789",
+  "email": "alice@google.com",
+  "role": "TenantAdmin",
+  "iat": 1720000000,
+  "exp": 1720086400
+}
+```
+
+#### RBAC, The roles in order of privilege:
+
+1. SuperAdmin: cross-tenant access for your internal team only
+2. TenantAdmin: full access within their tenant
+3. Member: read and write within their tenant
+4. Viewer: read-only within their tenant
+
+## Per-Tenant Rate Limiting
+
+Motivation why per tenant: IP-based rate limiting breaks down in SaaS. A corporate customer might route hundreds of users through a single NAT gateway, sharing one IP address. One heavy tenant throttles everyone else on that IP address.
+
+Scope limits to `tenant_id` instead
