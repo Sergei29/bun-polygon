@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:17
 
-    container_name: clinic-postgres
+    container_name: multi_tenant_postgres
 
     restart: unless-stopped
 
@@ -12,10 +12,10 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: clinic
+      POSTGRES_DB: multi_tenant
 
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - multi-tenant-data:/var/lib/postgresql/data
 
 volumes:
-  postgres-data:
+  multi-tenant-data:
