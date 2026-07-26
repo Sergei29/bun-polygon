@@ -1,4 +1,3 @@
-import { type RequestHandler } from "express";
 import rateLimitExpress from "express-rate-limit";
 import { RedisStore, type RedisReply } from "rate-limit-redis";
 import { redisClient } from "@/db/redis";

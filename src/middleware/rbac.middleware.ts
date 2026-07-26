@@ -20,9 +20,3 @@ export const requireRole = (...roles: JwtPayload["role"][]): RequestHandler => {
     next();
   };
 };
-
-export const rbacMiddleware: RequestHandler = async (req, res, next) => {
-  // roles based authorization logic here
-
-  return next();
-};
